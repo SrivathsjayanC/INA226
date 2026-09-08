@@ -10,7 +10,9 @@
 
 #include "main.h"
 
-#define FAULT_DETECTOR_ADDR    (uint8_t)(i2c_addr<<1) // since A0, A1 is connected to GND according to Schematic
+
+
+#define FAULT_DETECTOR_ADDR    (uint8_t)(FLT_DETECT.Init.i2c_addr<<1) // since A0, A1 is connected to GND according to Schematic
 
 typedef enum
 {
@@ -66,7 +68,7 @@ typedef struct
 } INA226_InitTypeDef_t;
 typedef struct
 {
-	I2C_HandleTypeDef hi2c;
+	I2C_HandleTypeDef *hi2c;
 
 	GPIO_TypeDef *FAULT_Port;
 	uint16_t FAULT_Pin;
@@ -128,14 +130,17 @@ typedef struct
 #define INA226_WRITE_EN_BIT  0x00U
 
 
-HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t hfault);
-HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t hfault);
-HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t hfault,INA226_Register_t reg,uint8_t *pData);
-HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t hfault,float *pData);
-HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t hfault,float *pData);
-HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t hfault,float *pData);
-HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t hfault,float *pData);
-HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t hfault);
-HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t hfault,INA226_En_Reg_t En_Bit_Pos,INA226_En_Msk_Op_t op);
-HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t hfault,uint16_t val);
+HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault);
+HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault);
+HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault,INA226_Register_t reg,uint8_t *pData);
+HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *pData);
+HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *pData);
+HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault,float *pData);
+HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault,float *pData);
+HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault);
+HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault,INA226_En_Reg_t Ina226_En_msk,INA226_En_Msk_Op_t op);
+HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault,uint16_t val);
+
+extern INA226_Handle_TypeDef_t FLT_DETECT;
+
 #endif /* INA226AIDGSR_H_ */
