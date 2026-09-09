@@ -65,7 +65,7 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 	uint16_t reg=0;
 
 	INA226_Reset(hfault);
-
+	HAL_Delay(2);
 	if(hfault->Init.op_mode > INA226_OP_MODE_SH_BUS_VT_CONT)
 	{
 		return HAL_ERROR;
@@ -154,7 +154,7 @@ HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault,INA226_Register
 	uint8_t reg_addr = (uint8_t)reg;
 	HAL_StatusTypeDef status;
 	status = HAL_I2C_Master_Transmit(hfault->hi2c,hfault->Init.dev_i2c_addr, &reg_addr, 1, HAL_MAX_DELAY);
-	HAL_Delay(10);
+	HAL_Delay(5);
 	if(status != HAL_OK)
 	{
 		return status;
