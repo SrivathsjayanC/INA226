@@ -10,10 +10,6 @@
 
 #include "main.h"
 
-
-
-#define FAULT_DETECTOR_ADDR    (uint8_t)(FLT_DETECT.Init.i2c_addr<<1) // since A0, A1 is connected to GND according to Schematic
-
 typedef enum
 {
 	INA226_REG_CONFIG           = 0x00,
@@ -48,21 +44,15 @@ typedef enum
     INA226_EN_MSK_SUL  = 0x0E,    // Shunt Voltage Under-Limit
     INA226_EN_MSK_SOL  = 0x0F     // Shunt Voltage Over-Limit
 } INA226_En_Reg_t;
-typedef enum
-{
-	INA226_EN_MSK_BIT_CLEAR,
-	INA226_EN_MSK_BIT_SET
-
-} INA226_En_Msk_Op_t;
 typedef struct
 {
-	uint8_t i2c_addr;
 	uint8_t avg;
 	uint8_t vbusct;
 	uint8_t vshct;
 	uint8_t op_mode;
 	float max_cur_exp_A;
 	float shunt_res_Ohm;
+	uint16_t dev_i2c_addr;
 	INA226_Register_t reg;
 
 } INA226_InitTypeDef_t;
@@ -75,6 +65,8 @@ typedef struct
 
 	INA226_InitTypeDef_t Init;
 
+	float _current_lsb_A;
+	float _power_lsb_W;
 } INA226_Handle_TypeDef_t;
 // @avg
 #define INA226_AVG_1                0x00U
@@ -129,6 +121,8 @@ typedef struct
 #define INA226_READ_EN_BIT   0x01U
 #define INA226_WRITE_EN_BIT  0x00U
 
+#define ENABLE 0x01U
+#define DISABLE 0x00U
 
 HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault);
 HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault);
@@ -138,9 +132,6 @@ HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *p
 HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault,float *pData);
 HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault,float *pData);
 HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault);
-HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault,INA226_En_Reg_t Ina226_En_msk,INA226_En_Msk_Op_t op);
+HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault,INA226_En_Reg_t Ina226_En_msk,uint8_t En_Di);
 HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault,uint16_t val);
-
-extern INA226_Handle_TypeDef_t FLT_DETECT;
-
 #endif /* INA226AIDGSR_H_ */
