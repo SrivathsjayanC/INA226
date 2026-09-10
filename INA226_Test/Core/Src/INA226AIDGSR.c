@@ -238,7 +238,7 @@ HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault,float 
 		return status;
 	}
 
-	shnt_vlt_raw = (uint16_t)rx[0] << 8 | rx[1];
+	shnt_vlt_raw = (int16_t)((uint16_t)rx[0] << 8 | rx[1]);
 
 	float shunt_vltg = (shnt_vlt_raw * 2.5e-6f);
 
@@ -313,7 +313,7 @@ HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault,float *pD
 	{
 		return status;
 	}
-	cur_raw = ((uint16_t)rx[0] << 8) | rx[1];
+	cur_raw = (int16_t)(((uint16_t)rx[0] << 8) | rx[1]);
 
 	*pData = (float)cur_raw * hfault->_current_lsb_A;
 
