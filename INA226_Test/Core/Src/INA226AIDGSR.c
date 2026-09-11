@@ -106,10 +106,9 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 
 }
 /**
- * @brief  Writes a 16-bit value to a specified INA226 register.
- * @details Packs the 8-bit register pointer address followed by the 16-bit data
- *          value (transmitted MSB first) into a 3-byte payload buffer and sends
- *          it to the target device over the I2C bus.
+ * @brief  Writes a 16-bit value to a specified INA226 register over I2C.
+ * @details Splits the 16-bit data value into MSB and LSB, and writes them
+ *          to the target device register using the HAL I2C memory write API.
  *
  * @param[in] hfault Pointer to the INA226 handle structure containing device and I2C configuration.
  * @param[in] Reg    Target register address/command (type ::INA226_Register_t).
@@ -158,11 +157,32 @@ HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Registe
 	uint8_t rx_buff[2];
 
 	status = HAL_I2C_Mem_Read(hfault->hi2c, hfault->Init.dev_i2c_addr, reg, 1, rx_buff, 2, HAL_MAX_DELAY);
-
+	if(status != HAL_OK)
+	{
+		return status;
+	}
 	*pData = (((uint16_t)rx_buff[0]<<8) | rx_buff[1]);
 
 	return status;
 }
+/**
+ * @brief  Reads a 16-bit signed register from the INA226 over I2C.
+ * @details Uses the I2C memory read sequence to fetch 2 consecutive data bytes
+ *          from the specified target register and reconstructs them into a
+ *          signed 16-bit integer (MSB first). This is used specifically for
+ *          two's complement registers such as Shunt Voltage and Current.
+ *
+ * @param[in]  hfault Pointer to the INA226 handle structure containing the
+ *                    I2C peripheral instance and target device address.
+ * @param[in]  reg    Target register address to read from (type ::INA226_Register_t).
+ * @param[out] pData  Pointer to a signed 16-bit variable where the reconstructed
+ *                    register value will be written. Must not be NULL.
+ *
+ * @retval HAL_OK       Register read completed successfully over I2C.
+ * @retval HAL_ERROR    The pData pointer is NULL or an I2C communication failure occurred.
+ * @retval HAL_BUSY     The I2C peripheral is currently busy.
+ * @retval HAL_TIMEOUT  The I2C read operation timed out.
+ */
 static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault, INA226_Register_t reg,int16_t *pData)
 {
 	if(pData == NULL)
@@ -174,7 +194,10 @@ static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault,
 	uint8_t rx_buff[2];
 
 	status = HAL_I2C_Mem_Read(hfault->hi2c, hfault->Init.dev_i2c_addr, reg, 1, rx_buff, 2, HAL_MAX_DELAY);
-
+	if(status != HAL_OK)
+	{
+		return status;
+	}
 	*pData = (((uint16_t)rx_buff[0]<<8) | rx_buff[1]);
 
 	return status;
