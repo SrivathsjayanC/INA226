@@ -108,25 +108,24 @@ typedef struct
 #define INA226_OP_MODE_BUS_VT_CONT    0x06U
 #define INA226_OP_MODE_SH_BUS_VT_CONT 0x07U
 
-#define INA226_OP_MODE_POS   0x00U
-#define INA226_VSHCT_POS     0x03U
-#define INA226_VBUSCT_POS    0x06U
-#define INA226_AVG_POS       0x09U
-#define INA226_RST_POS       0x0FU
+#define _INA226_OP_MODE_POS   0x00U
+#define _INA226_VSHCT_POS     0x03U
+#define _INA226_VBUSCT_POS    0x06U
+#define _INA226_AVG_POS       0x09U
+#define _INA226_RST_POS       0x0FU
 
-#define INA226_I2C_REG_POS       0x10U
-#define INA226_I2C_DEVICE_ID_POS 0x19U
-#define INA226_I2C_W_R_EN_POS    0x18U
-
-#define INA226_READ_EN_BIT   0x01U
-#define INA226_WRITE_EN_BIT  0x00U
+//#define _INA226_I2C_REG_POS       0x10U
+//#define _INA226_I2C_DEVICE_ID_POS 0x19U
+//#define _INA226_I2C_W_R_EN_POS    0x18U
+//#define INA226_READ_EN_BIT   0x01U
+//#define INA226_WRITE_EN_BIT  0x00U
 
 #define ENABLE 0x01U
 #define DISABLE 0x00U
 
 HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault);
 HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault);
-HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault,INA226_Register_t reg,uint8_t *pData);
+HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t reg, uint16_t *pData);
 HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *pData);
 HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *pData);
 HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault,float *pData);

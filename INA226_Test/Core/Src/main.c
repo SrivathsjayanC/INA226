@@ -105,16 +105,16 @@ int main(void)
   FLT_DETECT.Init.avg = INA226_AVG_128;
   FLT_DETECT.Init.dev_i2c_addr = (0x40<<1U);
   INA226_Init(&FLT_DETECT);
-  FLT_DETECT.Init.max_cur_exp_A = 0.25;
-  FLT_DETECT.Init.shunt_res_Ohm = 0.1;
-  INA226_Set_Calib(&FLT_DETECT);
+//  FLT_DETECT.Init.max_cur_exp_A = 0.25;
+//  FLT_DETECT.Init.shunt_res_Ohm = 0.1;
+//  INA226_Set_Calib(&FLT_DETECT);
   float ff;
   uint32_t len;
   char c[40];
   uint16_t val = 0x0FA0;
 //  uint16_t dd;
-  INA226_Modify_En_Msk(&FLT_DETECT, INA226_EN_MSK_BOL, ENABLE);
-  INA226_Set_Alert_Val(&FLT_DETECT, val);
+//  INA226_Modify_En_Msk(&FLT_DETECT, INA226_EN_MSK_BOL, ENABLE);
+//  INA226_Set_Alert_Val(&FLT_DETECT, val);
 
   /* USER CODE END 2 */
 
