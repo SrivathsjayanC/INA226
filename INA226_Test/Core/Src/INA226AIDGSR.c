@@ -428,7 +428,9 @@ HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault,float *pDat
  */
 HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault,INA226_En_Reg_t Ina226_En_msk,uint8_t En_Di)
 {
-	if (Ina226_En_msk > INA226_EN_MSK_SOL)
+	if (Ina226_En_msk > INA226_EN_MSK_SOL ||
+			(Ina226_En_msk >= INA226_FLAG_OVF && Ina226_En_msk <= INA226_FLAG_AFF ) ||
+			(Ina226_En_msk >= 0x05U && Ina226_En_msk <= 0x09))
 	{
 		return HAL_ERROR;
 	}
@@ -473,4 +475,39 @@ HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault,uint16_t 
 {
 	return INA226_WriteReg(hfault,INA226_REG_ALERT,val);
 }
-
+/**
+ * @brief  Reads the status of a specific diagnostic or fault flag from the INA226.
+ * @details Reads the 16-bit Mask/Enable Register (06h) over I2C and isolates the
+ *          requested flag bit to check if a specific condition (e.g., Math Overflow
+ *          or Alert Function Flag) has been asserted.
+ *
+ * @note    Reading the Mask/Enable Register automatically clears the latched
+ *          read-only flags (such as OVF and AFF) on the INA226 silicon.
+ *
+ * @param[in,out] hfault     Pointer to the INA226 handle structure containing the
+ *                           I2C peripheral instance and target device address.
+ * @param[in]     Ina226_Flag Target status flag bit position to inspect
+ *                           (type ::INA226_Status_Flag_t).
+ *
+ * @retval Non-zero Bitmask value corresponding to the asserted flag bit.
+ * @retval 0        The specified flag is cleared (inactive).
+ * @retval HAL_ERROR Input validation failed (NULL pointer, I2C address is 0,
+ *                   or flag position is out of range).
+ * @retval 0x99     An I2C communication error occurred while reading the register.
+ */
+uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault,INA226_Status_Flag_t Ina226_Flag)
+{
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 ||
+			Ina226_Flag > INA226_FLAG_AFF || Ina226_Flag < INA226_FLAG_OVF)
+	{
+		return HAL_ERROR;
+	}
+	uint16_t status_data;
+	HAL_StatusTypeDef status;
+	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN, &status_data);
+	if(status != HAL_OK)
+	{
+		return 0x99;
+	}
+	return ((status_data & 1U << Ina226_Flag));
+}

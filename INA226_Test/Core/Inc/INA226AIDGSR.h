@@ -28,11 +28,11 @@ typedef enum
 } INA226_Register_t;
 typedef enum
 {
-    INA226_STATUS_OVF  = 0x02,    // Math Overflow Flag
-    INA226_STATUS_CVRF = 0x03,    // Conversion Ready Flag
-    INA226_STATUS_AFF  = 0x04,    // Alert Function Flag
+    INA226_FLAG_OVF  = 0x02,    // Math Overflow Flag
+    INA226_FLAG_CVRF = 0x03,    // Conversion Ready Flag
+    INA226_FLAG_AFF  = 0x04,    // Alert Function Flag
 
-} INA226_Status_t;
+} INA226_Status_Flag_t;
 typedef enum
 {
     INA226_EN_MSK_LEN  = 0x00,    // Conversion Ready / Alert Enable
@@ -138,4 +138,5 @@ HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault,float *pD
 HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault);
 HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault,INA226_En_Reg_t Ina226_En_msk,uint8_t En_Di);
 HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault,uint16_t val);
+uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault,INA226_Status_Flag_t _Ina226_Flag);
 #endif /* INA226AIDGSR_H_ */
