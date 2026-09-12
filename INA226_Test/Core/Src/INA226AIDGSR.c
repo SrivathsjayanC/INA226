@@ -42,7 +42,7 @@ static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault,
  */
 HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault)
 {
-	uint16_t reset_bit = 0x01 << _INA226_RST_POS;
+	uint16_t reset_bit = 0x01U << __INA226_RST_POS;
 
 	return INA226_WriteReg(hfault, INA226_REG_CONFIG,reset_bit);
 }
@@ -63,6 +63,10 @@ HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault)
  */
 HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 {
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0)
+	{
+		return HAL_ERROR;
+	}
 	uint16_t reg=0;
 
 	INA226_Reset(hfault);
@@ -80,27 +84,27 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 		return HAL_ERROR;
 	}
 
-	reg |= hfault->Init.op_mode << _INA226_OP_MODE_POS;
+	reg |= hfault->Init.op_mode << __INA226_OP_MODE_POS;
 
 	if(hfault->Init.avg > INA226_AVG_1024)
 	{
 		return HAL_ERROR;
 	}
 
-	reg |= hfault->Init.avg << _INA226_AVG_POS;
+	reg |= hfault->Init.avg << __INA226_AVG_POS;
 
 	if(hfault->Init.vbusct > INA226_VBUSCT_8_244MS)
 	{
 		return HAL_ERROR;
 	}
 
-	reg |= hfault->Init.vbusct << _INA226_VBUSCT_POS;
+	reg |= hfault->Init.vbusct << __INA226_VBUSCT_POS;
 
 	if(hfault->Init.vshct > INA226_VSHCT_8_244MS)
 	{
 		return HAL_ERROR;
 	}
-	reg |= hfault->Init.vshct << _INA226_VSHCT_POS;
+	reg |= hfault->Init.vshct << __INA226_VSHCT_POS;
 
 	return INA226_WriteReg(hfault,INA226_REG_CONFIG,reg);
 
@@ -148,14 +152,14 @@ static HAL_StatusTypeDef INA226_WriteReg(INA226_Handle_TypeDef_t *hfault,INA226_
  */
 HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t reg,uint16_t *pData)
 {
-	if(pData == NULL)
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
 	{
 		return HAL_ERROR;
 	}
 
 	HAL_StatusTypeDef status;
 	uint8_t rx_buff[2];
-
+	
 	status = HAL_I2C_Mem_Read(hfault->hi2c, hfault->Init.dev_i2c_addr, reg, 1, rx_buff, 2, HAL_MAX_DELAY);
 	if(status != HAL_OK)
 	{
@@ -221,7 +225,10 @@ static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault,
  */
 HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
 {
-
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0)
+	{
+		return HAL_ERROR;
+	}
 	if ((hfault->Init.max_cur_exp_A <= 0.0f) || (hfault->Init.shunt_res_Ohm <= 0.0f))
 	{
 		return HAL_ERROR;
@@ -232,7 +239,7 @@ HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
 
 	cal_f = (float)(0.00512f / (current_lsb * hfault->Init.shunt_res_Ohm));
 
-	if ((cal_f < 1.0f) || (cal_f > 32767.0f))
+	if ((cal_f < 1.0f) || (cal_f > 32768.0f))
 	{
 		return HAL_ERROR;
 	}
@@ -264,7 +271,7 @@ HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
  */
 HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *pData)
 {
-	if(pData == NULL)
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
 	{
 		return HAL_ERROR;
 	}
@@ -299,7 +306,7 @@ HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault,float 
  */
 HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *pData)
 {
-	if(pData == NULL)
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
 	{
 		return HAL_ERROR;
 	}
@@ -334,18 +341,27 @@ HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault,float *p
  */
 HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault,float *pData)
 {
-	if(pData == NULL)
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
 	{
 		return HAL_ERROR;
 	}
-	int16_t cur_raw;
+	uint16_t alert;
 	HAL_StatusTypeDef status;
+	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN, &alert);
+	if(status != HAL_OK)
+	{
+		return status;
+	}
+	if(alert & __INA226_OVF_BIT)
+	{
+		return __INA226_STATUS_OVF;
+	}
+	int16_t cur_raw;
 	status = _INA226_ReadReg_Signed(hfault,INA226_REG_CURRENT,&cur_raw);
 	if(status != HAL_OK)
 	{
 		return status;
 	}
-
 	*pData = (float)cur_raw * hfault->_current_lsb_A;
 
 	return status;
@@ -367,12 +383,22 @@ HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault,float *pD
  */
 HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault,float *pData)
 {
-	if(pData == NULL)
+	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
 	{
 		return HAL_ERROR;
 	}
-	uint16_t power_raw;
 	HAL_StatusTypeDef status;
+	uint16_t alert;
+	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN, &alert);
+	if(status != HAL_OK)
+	{
+		return status;
+	}
+	if(alert & __INA226_OVF_BIT)
+	{
+		return __INA226_STATUS_OVF;
+	}
+	uint16_t power_raw;
 	status = INA226_ReadReg(hfault,INA226_REG_POWER,&power_raw);
 	if(status != HAL_OK)
 	{
@@ -447,3 +473,4 @@ HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault,uint16_t 
 {
 	return INA226_WriteReg(hfault,INA226_REG_ALERT,val);
 }
+

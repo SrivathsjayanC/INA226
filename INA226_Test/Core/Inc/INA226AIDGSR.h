@@ -26,14 +26,17 @@ typedef enum
 	INA226_REG_MANF_ID          = 0xFE,
 	INA226_REG_DIE_ID           = 0xFF
 } INA226_Register_t;
+typedef enum
+{
+    INA226_STATUS_OVF  = 0x02,    // Math Overflow Flag
+    INA226_STATUS_CVRF = 0x03,    // Conversion Ready Flag
+    INA226_STATUS_AFF  = 0x04,    // Alert Function Flag
 
+} INA226_Status_t;
 typedef enum
 {
     INA226_EN_MSK_LEN  = 0x00,    // Conversion Ready / Alert Enable
     INA226_EN_MSK_APOL = 0x01,    // Alert Polarity
-    INA226_EN_MSK_OVF  = 0x02,    // Math Overflow Flag
-    INA226_EN_MSK_CVRF = 0x03,    // Conversion Ready Flag
-    INA226_EN_MSK_AFF  = 0x04,    // Alert Function Flag
 
 	// 0x05 to 0x09 Reserved
 
@@ -108,12 +111,14 @@ typedef struct
 #define INA226_OP_MODE_BUS_VT_CONT    0x06U
 #define INA226_OP_MODE_SH_BUS_VT_CONT 0x07U
 
-#define _INA226_OP_MODE_POS   0x00U
-#define _INA226_VSHCT_POS     0x03U
-#define _INA226_VBUSCT_POS    0x06U
-#define _INA226_AVG_POS       0x09U
-#define _INA226_RST_POS       0x0FU
+#define __INA226_OP_MODE_POS   0x00U
+#define __INA226_VSHCT_POS     0x03U
+#define __INA226_VBUSCT_POS    0x06U
+#define __INA226_AVG_POS       0x09U
+#define __INA226_RST_POS       0x0FU
 
+#define __INA226_STATUS_OVF    HAL_ERROR
+#define __INA226_OVF_BIT       0x04U
 //#define _INA226_I2C_REG_POS       0x10U
 //#define _INA226_I2C_DEVICE_ID_POS 0x19U
 //#define _INA226_I2C_W_R_EN_POS    0x18U

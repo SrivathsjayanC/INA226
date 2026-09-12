@@ -99,22 +99,26 @@ int main(void)
   FLT_DETECT.FAULT_Port = GPIOB;
   FLT_DETECT.FAULT_Pin = GPIO_PIN_7;
   FLT_DETECT.hi2c = &hi2c1;
+  FLT_DETECT.Init.dev_i2c_addr = (0x45<<1U);
   FLT_DETECT.Init.op_mode = INA226_OP_MODE_SH_BUS_VT_CONT;
   FLT_DETECT.Init.vshct = INA226_VBUSCT_140US;
   FLT_DETECT.Init.vbusct = INA226_VBUSCT_140US;
   FLT_DETECT.Init.avg = INA226_AVG_128;
-  FLT_DETECT.Init.dev_i2c_addr = (0x40<<1U);
   INA226_Init(&FLT_DETECT);
-//  FLT_DETECT.Init.max_cur_exp_A = 0.25;
-//  FLT_DETECT.Init.shunt_res_Ohm = 0.1;
-//  INA226_Set_Calib(&FLT_DETECT);
+  FLT_DETECT.Init.max_cur_exp_A = 0.5;
+  FLT_DETECT.Init.shunt_res_Ohm = 0.1;
+  INA226_Set_Calib(&FLT_DETECT);
+//  INA226_Reset(&FLT_DETECT);
   float ff;
   uint32_t len;
   char c[40];
+  uint16_t dada = 0x7FFF;
   uint16_t val = 0x0FA0;
 //  uint16_t dd;
-//  INA226_Modify_En_Msk(&FLT_DETECT, INA226_EN_MSK_BOL, ENABLE);
-//  INA226_Set_Alert_Val(&FLT_DETECT, val);
+  INA226_Modify_En_Msk(&FLT_DETECT, INA226_EN_MSK_BUL, ENABLE);
+  ff =
+  len = sprintf(c,"Bus Voltage: %f\r",ff);
+  HAL_UART_Transmit(&huart2,(uint8_t*)c,len, HAL_MAX_DELAY);
 
   /* USER CODE END 2 */
 
@@ -127,7 +131,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET)
 	  {
-		  HAL_Delay(100);
+		  HAL_Delay(150);
 		  INA226_Get_Bus_Vltg_V(&FLT_DETECT, &ff);
 		  len = sprintf(c,"Bus Voltage: %f\r",ff);
 		  HAL_UART_Transmit(&huart2,(uint8_t*)c,len, HAL_MAX_DELAY);
@@ -137,8 +141,16 @@ int main(void)
 		  HAL_UART_Transmit(&huart2,(uint8_t*)c,len, HAL_MAX_DELAY);
 
 		  INA226_Get_Current_A(&FLT_DETECT, &ff);
-		  len = sprintf(c,"Current: %f\r\n",ff);
+		  len = sprintf(c,"Current: %f\r",ff);
 		  HAL_UART_Transmit(&huart2,(uint8_t*)c,len, HAL_MAX_DELAY);
+
+		  INA226_Get_Power_W(&FLT_DETECT, &ff);
+		  len = sprintf(c,"Power: %f\r\n",ff);
+		  HAL_UART_Transmit(&huart2,(uint8_t*)c,len, HAL_MAX_DELAY);
+
+		  INA226_Set_Alert_Val(&FLT_DETECT, val);
+
+
 	  }
   }
   /* USER CODE END 3 */
