@@ -72,7 +72,7 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 	status = INA226_Reset(hfault);
 	if(status != HAL_OK)
 	{
-		return HAL_ERROR;
+		return status;
 	}
 	HAL_Delay(2);
 	if(hfault->Init.op_mode > INA226_OP_MODE_SH_BUS_VT_CONT)
@@ -129,14 +129,11 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
  */
 static HAL_StatusTypeDef INA226_WriteReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg, uint16_t Data)
 {
-	HAL_StatusTypeDef status;
 	uint8_t tx[2];
 	tx[0] = (uint8_t)(Data>>8);
 	tx[1] = (uint8_t)Data;
 
-	status = HAL_I2C_Mem_Write(hfault->hi2c, hfault->Init.dev_i2c_addr, Ina226_Reg, 1, tx, 2, HAL_MAX_DELAY);
-
-	return status;
+	return HAL_I2C_Mem_Write(hfault->hi2c, hfault->Init.dev_i2c_addr, Ina226_Reg, 1, tx, 2, HAL_MAX_DELAY);
 }
 /**
  * @brief  Reads a 16-bit register from the INA226 over I2C.
@@ -190,6 +187,10 @@ HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Registe
  * @retval HAL_ERROR    The pData pointer is NULL or an I2C communication failure occurred.
  * @retval HAL_BUSY     The I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  The I2C read operation timed out.
+ *
+ * @note   This function is intended for INA226 registers whose data is
+ *         represented as a signed 16-bit two's-complement value, such as
+ *         the Shunt Voltage and Current registers.
  */
 static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg,int16_t *pData)
 {
