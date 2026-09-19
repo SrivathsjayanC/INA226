@@ -1,8 +1,8 @@
 /*
- * INA226AIDGSR.c
+ *	@file INA226AIDGSR.c
+ *  @date 2026-07-15
  *
- *  Created on: Jul 15, 2026
- *      Author: SRIVATHSJAYAN
+ * @Author: SRIVATHSJAYAN
  */
 
 /*
@@ -23,11 +23,13 @@
   Set_Mask_En
   Set_Alert_Val
  * */
-#include "INA226AIDGSR.h"
+
+#include "../../Perp_Driver/INA226AIDGSR.h"
 
 static HAL_StatusTypeDef INA226_WriteReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg, uint16_t Data);
 static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg, int16_t *pData);
 /**
+ *
  * @brief  Performs a software reset on the INA226 device.
  * @details Sets the reset bit (RST, bit 15) in the Configuration Register (00h)
  *          over the I2C interface, restoring all internal registers to their

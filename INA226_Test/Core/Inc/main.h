@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "INA226AIDGSR.h"
+#include "../../Perp_Driver/INA226AIDGSR.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
