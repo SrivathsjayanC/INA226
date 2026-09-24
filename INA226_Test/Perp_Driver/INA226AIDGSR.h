@@ -1,8 +1,7 @@
 /*
- * INA226AIDGSR.h
- *
- *  Created on: Jul 15, 2026
- *      Author: SRIVATHSJAYAN
+ * 	@file INA226AIDGSR.h
+ *  @date 15 Jul 2026
+ *  @author SRIVATHSJAYAN
  */
 
 #ifndef INA226AIDGSR_H_
@@ -12,40 +11,40 @@
 
 typedef enum
 {
-	INA226_REG_CONFIG           = 0x00,
-	INA226_REG_SHUNT_VLTG       = 0x01,
-	INA226_REG_BUS_VLTG         = 0x02,
-	INA226_REG_POWER            = 0x03,
-	INA226_REG_CURRENT          = 0x04,
-	INA226_REG_CALIB            = 0x05,
-	INA226_REG_MSK_EN           = 0x06,
-	INA226_REG_ALERT            = 0x07,
+	INA226_REG_CONFIG           = 0x00U,
+	INA226_REG_SHUNT_VLTG       = 0x01U,
+	INA226_REG_BUS_VLTG         = 0x02U,
+	INA226_REG_POWER            = 0x03U,
+	INA226_REG_CURRENT          = 0x04U,
+	INA226_REG_CALIB            = 0x05U,
+	INA226_REG_MSK_EN           = 0x06U,
+	INA226_REG_ALERT            = 0x07U,
 
 	// 0x08 - 0xFD Reserved
 
-	INA226_REG_MANF_ID          = 0xFE,
-	INA226_REG_DIE_ID           = 0xFF
+	INA226_REG_MANF_ID          = 0xFEU,
+	INA226_REG_DIE_ID           = 0xFFU
 } INA226_Register_t;
 typedef enum
 {
-    INA226_FLAG_OVF  = 0x02,    // Math Overflow Flag
-    INA226_FLAG_CVRF = 0x03,    // Conversion Ready Flag
-    INA226_FLAG_AFF  = 0x04,    // Alert Function Flag
+    INA226_FLAG_OVF  = 0x02U,    // Math Overflow Flag
+    INA226_FLAG_CVRF = 0x03U,    // Conversion Ready Flag
+    INA226_FLAG_AFF  = 0x04U,    // Alert Function Flag
 
 } INA226_Status_Flag_t;
 typedef enum
 {
-    INA226_EN_MSK_LEN  = 0x00,    // Conversion Ready / Alert Enable
-    INA226_EN_MSK_APOL = 0x01,    // Alert Polarity
+    INA226_EN_MSK_LEN  = 0x00U,    // Conversion Ready / Alert Enable
+    INA226_EN_MSK_APOL = 0x01U,    // Alert Polarity
 
 	// 0x05 to 0x09 Reserved
 
-	INA226_EN_MSK_CNRV = 0x0A,    // Conversion Ready
-    INA226_EN_MSK_POL  = 0x0B,    // Power Limit
-    INA226_EN_MSK_BUL  = 0x0C,    // Bus Voltage Under-Limit
-    INA226_EN_MSK_BOL  = 0x0D,    // Bus Voltage Over-Limit
-    INA226_EN_MSK_SUL  = 0x0E,    // Shunt Voltage Under-Limit
-    INA226_EN_MSK_SOL  = 0x0F     // Shunt Voltage Over-Limit
+	INA226_EN_MSK_CNRV = 0x0AU,    // Conversion Ready
+    INA226_EN_MSK_POL  = 0x0BU,    // Power Limit
+    INA226_EN_MSK_BUL  = 0x0CU,    // Bus Voltage Under-Limit
+    INA226_EN_MSK_BOL  = 0x0DU,    // Bus Voltage Over-Limit
+    INA226_EN_MSK_SUL  = 0x0EU,    // Shunt Voltage Under-Limit
+    INA226_EN_MSK_SOL  = 0x0FU     // Shunt Voltage Over-Limit
 } INA226_En_Reg_t;
 typedef struct
 {
