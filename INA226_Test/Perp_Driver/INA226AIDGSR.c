@@ -48,16 +48,19 @@ HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault)
 	return INA226_WriteReg(hfault, INA226_REG_CONFIG,reset_bit);
 }
 /**
- * @brief  Initializes the INA226 power/current monitor over I2C.
+ * @brief  Initializes the INA226 power/current monitor over I2C and caches the trigger configuration.
  * @details Validates the handle pointers, device address, and user settings,
  *          issues a software reset to restore power-on defaults, waits 2 ms
  *          for internal reboot completion, and writes the operating mode,
  *          averaging count, and conversion times into the Configuration Register (00h).
+ *          Additionally, caches the assembled configuration register word into
+ *          `__reg_trigger` within the handle structure for subsequent one-shot conversions.
  *
- * @param[in] hfault Pointer to the INA226 handle structure containing the
- *                   I2C peripheral instance, device address, and initialization parameters.
+ * @param[in,out] hfault Pointer to the INA226 handle structure containing the
+ *                       I2C peripheral instance, device address, and initialization parameters.
+ *                       Acts as an input for configuration settings and an output for caching `__reg_trigger`.
  *
- * @retval HAL_OK       Device initialized and Configuration Register updated successfully.
+ * @retval HAL_OK       Device initialized successfully and trigger settings cached.
  * @retval HAL_ERROR    A pointer argument is NULL, the target I2C address is 0,
  *                      an initialization parameter is out of valid range or set to an
  *                      invalid power-down state, or an I2C communication failure occurred.
@@ -112,9 +115,15 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 		return HAL_ERROR;
 	}
 	reg |= hfault->Init.vshct << __INA226_VSHCT_POS;
+	status =  INA226_WriteReg(hfault,INA226_REG_CONFIG,reg);
+	if(status!= HAL_OK)
+	{
+		return status;
+	}
 
-	return INA226_WriteReg(hfault,INA226_REG_CONFIG,reg);
+	hfault->__reg_trigger = reg;
 
+	return status;
 }
 /**
  * @brief  Writes a 16-bit value to a specified INA226 register over I2C.
@@ -251,7 +260,7 @@ HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
 
 	cal_f = (float)(__INA226_CALIBRATION_CONSTANT / (current_lsb * hfault->Init.shunt_res_Ohm));
 
-	if ((cal_f < 1.0f) || (cal_f > __INA226_CURRENT_LSB_DIVISOR))
+	if ((cal_f < 1.0f) || (cal_f > 32768.0f))
 	{
 		return HAL_ERROR;
 	}
@@ -485,6 +494,21 @@ HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_E
  */
 HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault, uint16_t val)
 {
+	uint16_t reg;
+	HAL_StatusTypeDef status;
+	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN,&reg);
+	if(status != HAL_OK)
+	{
+		return status;
+	}
+	if(!((reg & (1U<<INA226_EN_MSK_POL))||
+			(reg & (1U<<INA226_EN_MSK_BUL))||
+			(reg & (1U<<INA226_EN_MSK_BOL))||
+			(reg & (1U<<INA226_EN_MSK_SUL))||
+			(reg & (1U<<INA226_EN_MSK_SOL))))
+	{
+		return HAL_ERROR;
+	}
 	return INA226_WriteReg(hfault,INA226_REG_ALERT,val);
 }
 /**
@@ -520,4 +544,27 @@ uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault, INA226_Status_Fl
 		return 0x99U;
 	}
 	return ((status_data & 1U << Ina226_Flag));
+}
+/**
+ * @brief  Triggers a one-shot conversion on the INA226.
+ * @details Validates the handle pointer, I2C peripheral instance, and device address,
+ *          then writes the pre-configured trigger settings (`__reg_trigger`) to the
+ *          Configuration Register (00h) over I2C to initiate an ADC conversion cycle.
+ *
+ * @param[in] hfault Pointer to the INA226 handle structure containing device
+ *                   configuration, I2C peripheral instance, and cached trigger word.
+ *
+ * @retval HAL_OK       Trigger command successfully written over I2C.
+ * @retval HAL_ERROR    A pointer argument is NULL, the target device address is 0,
+ *                      or an I2C communication error occurred.
+ * @retval HAL_BUSY     The I2C peripheral is currently busy.
+ * @retval HAL_TIMEOUT  The I2C write operation timed out.
+ */
+HAL_StatusTypeDef INA226_Trigger_Conv(INA226_Handle_TypeDef_t *hfault)
+{
+	if(hfault == NULL ||hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0)
+	{
+		return HAL_ERROR;
+	}
+	return INA226_WriteReg(hfault, INA226_REG_CONFIG, hfault->__reg_trigger);
 }

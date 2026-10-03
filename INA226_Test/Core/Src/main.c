@@ -100,7 +100,7 @@ int main(void)
   FLT_DETECT.FAULT_Pin = GPIO_PIN_7;
   FLT_DETECT.hi2c = &hi2c1;
   FLT_DETECT.Init.dev_i2c_addr = (0x45<<1U);
-  FLT_DETECT.Init.op_mode = INA226_OP_MODE_SH_BUS_VT_CONT;
+  FLT_DETECT.Init.op_mode = INA226_OP_MODE_SH_BUS_VT_TRG;
   FLT_DETECT.Init.vshct = INA226_VBUSCT_140US;
   FLT_DETECT.Init.vbusct = INA226_VBUSCT_140US;
   FLT_DETECT.Init.avg = INA226_AVG_1024;

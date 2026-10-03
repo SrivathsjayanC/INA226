@@ -69,6 +69,7 @@ typedef struct
 
 	float _current_lsb_A;
 	float _power_lsb_W;
+	uint16_t __reg_trigger;
 } INA226_Handle_TypeDef_t;
 // @avg
 #define INA226_AVG_1                0x00U
@@ -139,4 +140,5 @@ HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault);
 HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_En_Reg_t Ina226_En_msk_, uint8_t En_Di);
 HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault, uint16_t val);
 uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault, INA226_Status_Flag_t _Ina226_Flag);
+HAL_StatusTypeDef INA226_Trigger_Conv(INA226_Handle_TypeDef_t *hfault);
 #endif /* INA226AIDGSR_H_ */
