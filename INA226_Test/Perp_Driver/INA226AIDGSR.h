@@ -48,27 +48,24 @@ typedef enum
 } INA226_En_Reg_t;
 typedef struct
 {
-	uint8_t avg;
-	uint8_t vbusct;
-	uint8_t vshct;
-	uint8_t op_mode;
-	float max_cur_exp_A;
-	float shunt_res_Ohm;
+	uint8_t  avg;
+	uint8_t  vbusct;
+	uint8_t  vshct;
+	uint8_t  op_mode;
+	float    max_cur_exp_A;
+	float    shunt_res_Ohm;
 	uint16_t dev_i2c_addr;
 
 } INA226_InitTypeDef_t;
 typedef struct
 {
-	I2C_HandleTypeDef *hi2c;
-
-	GPIO_TypeDef *FAULT_Port;
-	uint16_t FAULT_Pin;
-
-	INA226_InitTypeDef_t Init;
-
-	float _current_lsb_A;
-	float _power_lsb_W;
-	uint16_t __reg_trigger;
+	I2C_HandleTypeDef   * hi2c;
+	GPIO_TypeDef        * FAULT_Port;
+	uint16_t              FAULT_Pin;
+	INA226_InitTypeDef_t  Init;
+	float                 _current_lsb_A;
+	float                 _power_lsb_W;
+	uint16_t              __reg_trigger;
 } INA226_Handle_TypeDef_t;
 // @avg
 #define INA226_AVG_1                0x00U
