@@ -55,7 +55,6 @@ typedef struct
 	float max_cur_exp_A;
 	float shunt_res_Ohm;
 	uint16_t dev_i2c_addr;
-	INA226_Register_t reg;
 
 } INA226_InitTypeDef_t;
 typedef struct
@@ -129,16 +128,16 @@ typedef struct
 #define ENABLE 0x01U
 #define DISABLE 0x00U
 
-HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault);
-HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault);
-HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg_, uint16_t *pData);
-HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault, float *pData);
-HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault, float *pData);
-HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault, float *pData);
-HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault, float *pData);
-HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault);
-HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_En_Reg_t Ina226_En_msk_, uint8_t En_Di);
-HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault, uint16_t val);
-uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault, INA226_Status_Flag_t _Ina226_Flag);
-HAL_StatusTypeDef INA226_Trigger_Conv(INA226_Handle_TypeDef_t *hfault);
+HAL_StatusTypeDef INA226_Init (INA226_Handle_TypeDef_t * hfault);
+HAL_StatusTypeDef INA226_Reset (INA226_Handle_TypeDef_t * hfault);
+HAL_StatusTypeDef INA226_ReadReg (INA226_Handle_TypeDef_t * hfault, INA226_Register_t Ina226_Reg_, uint16_t * p_Data);
+HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V (INA226_Handle_TypeDef_t * hfault, float * p_Data);
+HAL_StatusTypeDef INA226_Get_Bus_Vltg_V (INA226_Handle_TypeDef_t * hfault, float * p_Data);
+HAL_StatusTypeDef INA226_Get_Power_W (INA226_Handle_TypeDef_t * hfault, float * p_Data);
+HAL_StatusTypeDef INA226_Get_Current_A (INA226_Handle_TypeDef_t * hfault, float * p_Data);
+HAL_StatusTypeDef INA226_Set_Calib (INA226_Handle_TypeDef_t * hfault);
+HAL_StatusTypeDef INA226_Modify_En_Msk (INA226_Handle_TypeDef_t * hfault, INA226_En_Reg_t Ina226_En_msk_, uint8_t En_Di);
+HAL_StatusTypeDef INA226_Set_Alert_Val (INA226_Handle_TypeDef_t * hfault, uint16_t val);
+uint8_t INA226_Get_Flag_Status (INA226_Handle_TypeDef_t * hfault, INA226_Status_Flag_t _Ina226_Flag);
+HAL_StatusTypeDef INA226_Trigger_Conv (INA226_Handle_TypeDef_t * hfault);
 #endif /* INA226AIDGSR_H_ */

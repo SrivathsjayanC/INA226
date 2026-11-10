@@ -25,8 +25,8 @@
 
 #include "../../Perp_Driver/INA226AIDGSR.h"
 
-static HAL_StatusTypeDef INA226_WriteReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg, uint16_t Data);
-static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg, int16_t *pData);
+static HAL_StatusTypeDef INA226_WriteReg (INA226_Handle_TypeDef_t * hfault, INA226_Register_t Ina226_Reg, uint16_t Data);
+static HAL_StatusTypeDef _INA226_ReadReg_Signed (INA226_Handle_TypeDef_t * hfault, INA226_Register_t Ina226_Reg, int16_t * p_Data);
 /**
  *
  * @brief  Performs a software reset on the INA226 device.
@@ -41,9 +41,9 @@ static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault,
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault)
+HAL_StatusTypeDef INA226_Reset (INA226_Handle_TypeDef_t * hfault)
 {
-	uint16_t reset_bit = 0x01U << __INA226_RST_POS;
+	uint16_t reset_bit = (0x01U << __INA226_RST_POS);
 
 	return INA226_WriteReg(hfault, INA226_REG_CONFIG,reset_bit);
 }
@@ -67,9 +67,9 @@ HAL_StatusTypeDef INA226_Reset(INA226_Handle_TypeDef_t *hfault)
  * @retval HAL_BUSY     The I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  The I2C transmission timed out.
  */
-HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
+HAL_StatusTypeDef INA226_Init (INA226_Handle_TypeDef_t * hfault)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0))
 	{
 		return HAL_ERROR;
 	}
@@ -115,7 +115,7 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 		return HAL_ERROR;
 	}
 	reg |= hfault->Init.vshct << __INA226_VSHCT_POS;
-	status =  INA226_WriteReg(hfault,INA226_REG_CONFIG,reg);
+	status =  INA226_WriteReg(hfault, INA226_REG_CONFIG, reg);
 	if(status!= HAL_OK)
 	{
 		return status;
@@ -126,25 +126,27 @@ HAL_StatusTypeDef INA226_Init(INA226_Handle_TypeDef_t *hfault)
 	return status;
 }
 /**
- * @brief  Writes a 16-bit value to a specified INA226 register over I2C.
- * @details Splits the 16-bit data word into MSB and LSB (transmitted MSB first)
- *          and transmits it along with the 8-bit register address to the target
- *          device using the HAL memory write API.
+ * @brief  Writes a 16-bit data value to a specific TMP1075 register.
  *
- * @param[in] hfault     Pointer to the INA226 handle structure containing device
- *                       and I2C peripheral configuration.
- * @param[in] Ina226_Reg Target register address to write to (type ::INA226_Register_t).
- * @param[in] Data       16-bit data value to write into the register.
+ * @details This internal helper function separates the 16-bit data into two
+ *          8-bit bytes (MSB first, LSB second) and transmits them via I2C
+ *          using the STM32 HAL memory write API.
  *
- * @retval HAL_OK       Register write completed successfully over I2C.
- * @retval HAL_ERROR    An I2C communication failure occurred.
- * @retval HAL_BUSY     I2C peripheral is currently busy.
- * @retval HAL_TIMEOUT  I2C transfer timed out.
+ * @param  htmp Pointer to a TMP1075_Handle_t structure that contains
+ *              the configuration information and I2C handle for the TMP1075 device.
+ * @param  Reg  The target register address to write to (of type TMP1075_Reg_t).
+ * @param  Data The 16-bit data to be written into the specified register.
+ *
+ * @retval HAL_StatusTypeDef HAL status of the I2C transaction:
+ *         - HAL_OK:      Data was written successfully.
+ *         - HAL_ERROR:   An error occurred during the I2C transmission (e.g., NACK or parameter error).
+ *         - HAL_BUSY:    The I2C peripheral is currently locked and cannot accept a new request.
+ *         - HAL_TIMEOUT: The I2C transaction exceeded the specified maximum delay (TMP1075_I2C_DELAY).
  */
-static HAL_StatusTypeDef INA226_WriteReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg, uint16_t Data)
+static HAL_StatusTypeDef INA226_WriteReg (INA226_Handle_TypeDef_t * hfault, INA226_Register_t Ina226_Reg, uint16_t Data)
 {
 	uint8_t tx[2];
-	tx[0] = (uint8_t)(Data>>8U);
+	tx[0] = (uint8_t)(Data >> 8U);
 	tx[1] = (uint8_t)Data;
 
 	return HAL_I2C_Mem_Write(hfault->hi2c, hfault->Init.dev_i2c_addr, Ina226_Reg, 1U, tx, 2U, HAL_MAX_DELAY);
@@ -162,17 +164,17 @@ static HAL_StatusTypeDef INA226_WriteReg(INA226_Handle_TypeDef_t *hfault, INA226
  *
  * @param[in]  hfault Pointer to the handle structure containing device and I2C peripheral configuration.
  * @param[in]  reg    Target register address to read (type ::INA226_Register_t).
- * @param[out] pData  Pointer to a 16-bit unsigned buffer where the received register
+ * @param[out] p_Data  Pointer to a 16-bit unsigned buffer where the received register
  *                    data will be stored. Must not be NULL.
  *
  * @retval HAL_OK       Register read completed successfully.
- * @retval HAL_ERROR    pData is NULL or an I2C communication error occurred.
+ * @retval HAL_ERROR    p_Data is NULL or an I2C communication error occurred.
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg,uint16_t *pData)
+HAL_StatusTypeDef INA226_ReadReg (INA226_Handle_TypeDef_t * hfault, INA226_Register_t Ina226_Reg, uint16_t * p_Data)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0) || (p_Data == NULL))
 	{
 		return HAL_ERROR;
 	}
@@ -185,7 +187,7 @@ HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Registe
 	{
 		return status;
 	}
-	*pData = (((uint16_t)rx_buff[0]<<8U) | (uint16_t)rx_buff[1]);
+	*p_Data = (((uint16_t)rx_buff[0]<<8U) | (uint16_t)rx_buff[1]);
 
 	return status;
 }
@@ -204,7 +206,7 @@ HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Registe
  * @param[in]  hfault     Pointer to the INA226 handle structure containing device
  *                        and I2C peripheral configuration.
  * @param[in]  Ina226_Reg Target register address to read from (type ::INA226_Register_t).
- * @param[out] pData      Pointer to a signed 16-bit variable where the reconstructed
+ * @param[out] p_Data      Pointer to a signed 16-bit variable where the reconstructed
  *                        register value will be stored.
  *
  * @retval HAL_OK       Register read completed successfully over I2C.
@@ -212,7 +214,7 @@ HAL_StatusTypeDef INA226_ReadReg(INA226_Handle_TypeDef_t *hfault, INA226_Registe
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault, INA226_Register_t Ina226_Reg,int16_t *pData)
+static HAL_StatusTypeDef _INA226_ReadReg_Signed (INA226_Handle_TypeDef_t * hfault, INA226_Register_t Ina226_Reg, int16_t * p_Data)
 {
 	HAL_StatusTypeDef status;
 	uint8_t rx_buff[2];
@@ -222,7 +224,7 @@ static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault,
 	{
 		return status;
 	}
-	*pData = (((uint16_t)rx_buff[0]<<8U) | (uint16_t)rx_buff[1]);
+	*p_Data = (((uint16_t)rx_buff[0]<<8U) | (uint16_t)rx_buff[1]);
 
 	return status;
 }
@@ -244,9 +246,9 @@ static HAL_StatusTypeDef _INA226_ReadReg_Signed(INA226_Handle_TypeDef_t *hfault,
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
+HAL_StatusTypeDef INA226_Set_Calib (INA226_Handle_TypeDef_t * hfault)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0))
 	{
 		return HAL_ERROR;
 	}
@@ -266,7 +268,7 @@ HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
 	}
 	uint16_t cal = (uint16_t)(cal_f + 0.5f);
 
-	status = INA226_WriteReg(hfault,INA226_REG_CALIB,cal);
+	status = INA226_WriteReg(hfault, INA226_REG_CALIB, cal);
 	if(status != HAL_OK)
 	{
 		return status;
@@ -282,23 +284,23 @@ HAL_StatusTypeDef INA226_Set_Calib(INA226_Handle_TypeDef_t *hfault)
  *          factor to compute the voltage in Volts.
  *
  * @param[in]  hfault Pointer to the handle structure containing device and I2C peripheral configuration.
- * @param[out] pData  Pointer to a float variable where the calculated shunt voltage
+ * @param[out] p_Data  Pointer to a float variable where the calculated shunt voltage
  *                    (in Volts) will be stored. Must not be NULL.
  *
  * @retval HAL_OK       Shunt voltage successfully read and calculated.
- * @retval HAL_ERROR    pData is NULL or an I2C communication error occurred.
+ * @retval HAL_ERROR    p_Data is NULL or an I2C communication error occurred.
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault, float *pData)
+HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V (INA226_Handle_TypeDef_t * hfault, float * p_Data)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0) || (p_Data == NULL))
 	{
 		return HAL_ERROR;
 	}
 	int16_t shnt_vlt_raw;
 	HAL_StatusTypeDef status;
-	status =  _INA226_ReadReg_Signed(hfault,INA226_REG_SHUNT_VLTG,&shnt_vlt_raw);
+	status =  _INA226_ReadReg_Signed(hfault, INA226_REG_SHUNT_VLTG, &shnt_vlt_raw);
 	if(status != HAL_OK)
 	{
 		return status;
@@ -306,7 +308,7 @@ HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault, float
 
 	float shunt_vltg = (shnt_vlt_raw * __INA226_SHUNT_VOLTAGE_LSB_V);
 
-	*pData = shunt_vltg;
+	*p_Data = shunt_vltg;
 
 	return status;
 }
@@ -317,23 +319,23 @@ HAL_StatusTypeDef INA226_Get_Shunt_Vltg_V(INA226_Handle_TypeDef_t *hfault, float
  *          the voltage in Volts.
  *
  * @param[in]  hfault Pointer to the INA226 handle structure containing device and I2C configuration.
- * @param[out] pData  Pointer to a float variable where the calculated bus voltage
+ * @param[out] p_Data  Pointer to a float variable where the calculated bus voltage
  *                    (in Volts) will be stored. Must not be NULL.
  *
  * @retval HAL_OK       Bus voltage successfully read and calculated.
- * @retval HAL_ERROR    pData is NULL or an I2C communication error occurred.
+ * @retval HAL_ERROR    p_Data is NULL or an I2C communication error occurred.
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault, float *pData)
+HAL_StatusTypeDef INA226_Get_Bus_Vltg_V (INA226_Handle_TypeDef_t * hfault, float * p_Data)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0) || (p_Data == NULL))
 	{
 		return HAL_ERROR;
 	}
 	uint16_t bus_vlt_raw;
 	HAL_StatusTypeDef status;
-	status = INA226_ReadReg(hfault,INA226_REG_BUS_VLTG,&bus_vlt_raw);
+	status = INA226_ReadReg(hfault, INA226_REG_BUS_VLTG, &bus_vlt_raw);
 	if(status != HAL_OK)
 	{
 		return status;
@@ -341,7 +343,7 @@ HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault, float *
 
 	float bus_vltg = (bus_vlt_raw * __INA226_BUS_VOLTAGE_LSB_V);
 
-	*pData = bus_vltg;
+	*p_Data = bus_vltg;
 
 	return status;
 }
@@ -352,17 +354,17 @@ HAL_StatusTypeDef INA226_Get_Bus_Vltg_V(INA226_Handle_TypeDef_t *hfault, float *
  *          Current_LSB value stored in the device handle.
  *
  * @param[in]  hfault Pointer to the handle structure containing INA226 configuration and I2C instance.
- * @param[out] pData  Pointer to a float variable where the calculated current
+ * @param[out] p_Data  Pointer to a float variable where the calculated current
  *                    (in Amperes) will be stored. Must not be NULL.
  *
  * @retval HAL_OK       Current successfully read and calculated.
- * @retval HAL_ERROR    pData is NULL or an I2C communication error occurred.
+ * @retval HAL_ERROR    p_Data is NULL or an I2C communication error occurred.
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault, float *pData)
+HAL_StatusTypeDef INA226_Get_Current_A (INA226_Handle_TypeDef_t * hfault, float * p_Data)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0) || (p_Data == NULL))
 	{
 		return HAL_ERROR;
 	}
@@ -378,12 +380,12 @@ HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault, float *p
 		return __INA226_STATUS_OVF;
 	}
 	int16_t cur_raw;
-	status = _INA226_ReadReg_Signed(hfault,INA226_REG_CURRENT,&cur_raw);
+	status = _INA226_ReadReg_Signed(hfault, INA226_REG_CURRENT, &cur_raw);
 	if(status != HAL_OK)
 	{
 		return status;
 	}
-	*pData = (float)cur_raw * hfault->_current_lsb_A;
+	*p_Data = (float)(cur_raw * hfault->_current_lsb_A);
 
 	return status;
 }
@@ -394,17 +396,17 @@ HAL_StatusTypeDef INA226_Get_Current_A(INA226_Handle_TypeDef_t *hfault, float *p
  *          Power_LSB value stored in the device handle.
  *
  * @param[in]  hfault Pointer to the handle structure containing INA226 configuration and I2C instance.
- * @param[out] pData  Pointer to a float variable where the calculated power
+ * @param[out] p_Data  Pointer to a float variable where the calculated power
  *                    (in Watts) will be stored. Must not be NULL.
  *
  * @retval HAL_OK       Power successfully read and calculated.
- * @retval HAL_ERROR    pData is NULL or an I2C communication error occurred.
+ * @retval HAL_ERROR    p_Data is NULL or an I2C communication error occurred.
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault, float *pData)
+HAL_StatusTypeDef INA226_Get_Power_W (INA226_Handle_TypeDef_t * hfault, float * p_Data)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 || pData == NULL)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0) || (p_Data == NULL))
 	{
 		return HAL_ERROR;
 	}
@@ -420,13 +422,13 @@ HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault, float *pDa
 		return __INA226_STATUS_OVF;
 	}
 	uint16_t power_raw;
-	status = INA226_ReadReg(hfault,INA226_REG_POWER,&power_raw);
+	status = INA226_ReadReg(hfault, INA226_REG_POWER, &power_raw);
 	if(status != HAL_OK)
 	{
 		return status;
 	}
 
-	*pData = (float)power_raw * hfault->_power_lsb_W;
+	*p_Data = (float)(power_raw * hfault->_power_lsb_W);
 
 	return status;
 }
@@ -447,11 +449,11 @@ HAL_StatusTypeDef INA226_Get_Power_W(INA226_Handle_TypeDef_t *hfault, float *pDa
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_En_Reg_t Ina226_En_msk, uint8_t En_Di)
+HAL_StatusTypeDef INA226_Modify_En_Msk (INA226_Handle_TypeDef_t * hfault, INA226_En_Reg_t Ina226_En_msk, uint8_t En_Di)
 {
-	if (Ina226_En_msk > INA226_EN_MSK_SOL ||
-			(Ina226_En_msk >= INA226_FLAG_OVF && Ina226_En_msk <= INA226_FLAG_AFF ) ||
-			(Ina226_En_msk >= 0x05 && Ina226_En_msk <= 0x09))
+	if ((Ina226_En_msk > INA226_EN_MSK_SOL) ||
+			((Ina226_En_msk >= INA226_FLAG_OVF) && (Ina226_En_msk <= INA226_FLAG_AFF )) ||
+			((Ina226_En_msk >= 0x05) && (Ina226_En_msk <= 0x09)))
 	{
 		return HAL_ERROR;
 	}
@@ -461,7 +463,7 @@ HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_E
 	}
 	uint16_t reg;
 	HAL_StatusTypeDef status;
-	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN,&reg);
+	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN, &reg);
 	if(status != HAL_OK)
 	{
 		return status;
@@ -476,7 +478,7 @@ HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_E
 		reg &= (uint16_t)~(1U << Ina226_En_msk);
 	}
 
-	return INA226_WriteReg(hfault,INA226_REG_MSK_EN,reg);
+	return INA226_WriteReg(hfault, INA226_REG_MSK_EN, reg);
 }
 /**
  * @brief  Sets the limit value in the INA226 Alert Limit Register (07h).
@@ -492,11 +494,11 @@ HAL_StatusTypeDef INA226_Modify_En_Msk(INA226_Handle_TypeDef_t *hfault, INA226_E
  * @retval HAL_BUSY     I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  I2C transfer timed out.
  */
-HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault, uint16_t val)
+HAL_StatusTypeDef INA226_Set_Alert_Val (INA226_Handle_TypeDef_t * hfault, uint16_t val)
 {
 	uint16_t reg;
 	HAL_StatusTypeDef status;
-	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN,&reg);
+	status = INA226_ReadReg(hfault, INA226_REG_MSK_EN, &reg);
 	if(status != HAL_OK)
 	{
 		return status;
@@ -531,10 +533,10 @@ HAL_StatusTypeDef INA226_Set_Alert_Val(INA226_Handle_TypeDef_t *hfault, uint16_t
  *                   or flag position is out of range).
  * @retval 0x99     An I2C communication error occurred while reading the register.
  */
-uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault, INA226_Status_Flag_t Ina226_Flag)
+uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t * hfault, INA226_Status_Flag_t Ina226_Flag)
 {
-	if(hfault == NULL || hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0 ||
-			Ina226_Flag > INA226_FLAG_AFF || Ina226_Flag < INA226_FLAG_OVF)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0) ||
+			(Ina226_Flag > INA226_FLAG_AFF) || (Ina226_Flag < INA226_FLAG_OVF))
 	{
 		return HAL_ERROR;
 	}
@@ -543,7 +545,7 @@ uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault, INA226_Status_Fl
 	{
 		return 0x99U;
 	}
-	return ((status_data & 1U << Ina226_Flag));
+	return ((status_data & (1U << Ina226_Flag)));
 }
 /**
  * @brief  Triggers a one-shot conversion on the INA226.
@@ -560,9 +562,9 @@ uint8_t INA226_Get_Flag_Status(INA226_Handle_TypeDef_t *hfault, INA226_Status_Fl
  * @retval HAL_BUSY     The I2C peripheral is currently busy.
  * @retval HAL_TIMEOUT  The I2C write operation timed out.
  */
-HAL_StatusTypeDef INA226_Trigger_Conv(INA226_Handle_TypeDef_t *hfault)
+HAL_StatusTypeDef INA226_Trigger_Conv (INA226_Handle_TypeDef_t * hfault)
 {
-	if(hfault == NULL ||hfault->hi2c == NULL || hfault->Init.dev_i2c_addr == 0)
+	if((hfault == NULL) || (hfault->hi2c == NULL) || (hfault->Init.dev_i2c_addr == 0))
 	{
 		return HAL_ERROR;
 	}
